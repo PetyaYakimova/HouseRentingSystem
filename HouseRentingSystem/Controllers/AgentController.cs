@@ -7,6 +7,7 @@ namespace HouseRentingSystem.Controllers
 	[Authorize]
 	public class AgentController : Controller
 	{
+		//Will be updated later
 		[HttpGet]
 		public async Task<IActionResult> Become()
 		{
