@@ -1,11 +1,11 @@
 ﻿using HouseRentingSystem.Core.Contacts.House;
-using HouseRentingSystem.Core.Models.House;
+using HouseRentingSystem.Core.Models.Home;
 using HouseRentingSystem.Infrastructure.Data.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace HouseRentingSystem.Core.Services.House
 {
-	public class HouseService : IHouseService
+    public class HouseService : IHouseService
 	{
 		private readonly IRepository repository;
 
