@@ -1,12 +1,12 @@
-﻿using HouseRentingSystem.Core.Contacts.House;
-using HouseRentingSystem.Core.Models.Home;
+﻿using HouseRentingSystem.Core.Contacts;
 using HouseRentingSystem.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace HouseRentingSystem.Controllers
 {
-	public class HomeController : Controller
+    public class HomeController : BaseController
 	{
 		private readonly ILogger<HomeController> logger;
 		private IHouseService houseService;
@@ -19,6 +19,7 @@ namespace HouseRentingSystem.Controllers
 			this.houseService = houseService;
 		}
 
+		[AllowAnonymous]
 		public async Task<IActionResult> Index()
 		{
 			var model = await houseService.LastThreeHousesAsync();
@@ -26,6 +27,7 @@ namespace HouseRentingSystem.Controllers
 			return View(model);
 		}
 
+		[AllowAnonymous]
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{

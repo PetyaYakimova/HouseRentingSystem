@@ -1,16 +1,27 @@
-﻿using HouseRentingSystem.Core.Models.Agent;
-using Microsoft.AspNetCore.Authorization;
+﻿using HouseRentingSystem.Core.Contacts;
+using HouseRentingSystem.Core.Models.Agent;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HouseRentingSystem.Controllers
 {
-	[Authorize]
-	public class AgentController : Controller
+	public class AgentController : BaseController
 	{
-		//Will be updated later
+		private readonly IAgentService agentService;
+
+		public AgentController(IAgentService agentService)
+		{
+			this.agentService = agentService;
+		}
+
 		[HttpGet]
 		public async Task<IActionResult> Become()
 		{
+			if (await agentService.ExistsByIdAsync(User.Id()))
+			{
+				return BadRequest();
+			}
+
 			var model = new BecomeAgentFormModel();
 
 			return View(model);
