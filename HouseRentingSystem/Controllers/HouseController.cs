@@ -1,86 +1,120 @@
-﻿using HouseRentingSystem.Core.Models.House;
+﻿using HouseRentingSystem.Attributes;
+using HouseRentingSystem.Core.Contacts;
+using HouseRentingSystem.Core.Models.House;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HouseRentingSystem.Controllers
 {
-	public class HouseController : BaseController
-	{
-		[AllowAnonymous]
-		[HttpGet]
-		public async Task<IActionResult> All()
-		{
-			var model = new AllHousesQueryModel();
+    public class HouseController : BaseController
+    {
+        private readonly IHouseService houseService;
+        private readonly IAgentService agentService;
 
-			return View(model);
-		}
+        public HouseController(IHouseService houseService, IAgentService agentService)
+        {
+            this.houseService = houseService;
+            this.agentService = agentService;
+        }
 
-		[HttpGet]
-		public async Task<IActionResult> Mine()
-		{
-			var model = new AllHousesQueryModel();
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> All()
+        {
+            var model = new AllHousesQueryModel();
 
-			return View(model);
-		}
+            return View(model);
+        }
 
-		[HttpGet]
-		public async Task<IActionResult> Details(int id)
-		{
-			var model = new HouseDetailsViewModel();
+        [HttpGet]
+        public async Task<IActionResult> Mine()
+        {
+            var model = new AllHousesQueryModel();
 
-			return View(model);
-		}
+            return View(model);
+        }
 
-		[HttpGet]
-		public IActionResult Add()
-		{
-			return View();
-		}
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var model = new HouseDetailsViewModel();
 
-		[HttpPost]
-		public async Task<IActionResult> Add(HouseFormModel model)
-		{
-			return RedirectToAction(nameof(Details), new { id = 1 });
-		}
+            return View(model);
+        }
 
-		[HttpGet]
-		public async Task<IActionResult> Edit(int id)
-		{
-			var model = new HouseFormModel();
+        [HttpGet]
+        [MustBeAgent]
+        public async Task<IActionResult> Add()
+        {
+            var model = new HouseFormModel()
+            {
+                Categories = await houseService.AllCategoriesAsync()
+            };
 
-			return View(model);
-		}
+            return View(model);
+        }
 
-		[HttpPost]
-		public async Task<IActionResult> Edit(int id, HouseFormModel model)
-		{
-			return RedirectToAction(nameof(Details), new { id = 1 });
-		}
+        [HttpPost]
+        [MustBeAgent]
+        public async Task<IActionResult> Add(HouseFormModel model)
+        {
+            if (await houseService.CategoryExistsAsync(model.CategoryId) == false)
+            {
+                ModelState.AddModelError(nameof(model.CategoryId), "");
+            }
 
-		[HttpGet]
-		public async Task<IActionResult> Delete(int id)
-		{
-			var model = new HouseDetailsViewModel();
+            if (ModelState.IsValid == false)
+            {
+                model.Categories = await houseService.AllCategoriesAsync();
+                return View(model);
+            }
 
-			return View(model);
-		}
+            int? agentId = await agentService.GetAgentByIdAsync(User.Id());
 
-		[HttpPost]
-		public async Task<IActionResult> Edit(HouseDetailsViewModel model)
-		{
-			return RedirectToAction(nameof(All));
-		}
+            int newHouseId = await houseService.CreateAsync(model, agentId ?? 0);
 
-		[HttpPost]
-		public async Task<IActionResult> Rent(int id)
-		{
-			return RedirectToAction(nameof(Mine));
-		}
+            return RedirectToAction(nameof(Details), new { id = newHouseId });
+        }
 
-		[HttpPost]
-		public async Task<IActionResult> Leave(int id)
-		{
-			return RedirectToAction(nameof(Mine));
-		}
-	}
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var model = new HouseFormModel();
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, HouseFormModel model)
+        {
+            return RedirectToAction(nameof(Details), new { id = 1 });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var model = new HouseDetailsViewModel();
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(HouseDetailsViewModel model)
+        {
+            return RedirectToAction(nameof(All));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Rent(int id)
+        {
+            return RedirectToAction(nameof(Mine));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Leave(int id)
+        {
+            return RedirectToAction(nameof(Mine));
+        }
+    }
 }
