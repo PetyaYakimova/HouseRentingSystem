@@ -1,3 +1,4 @@
+using HouseRentingSystem.Controllers;
 using HouseRentingSystem.ModelBinders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +8,7 @@ builder.Services.AddApplicationIdentity(builder.Configuration);
 
 builder.Services.AddControllersWithViews(options =>
 {
-	options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());
+    options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());
 });
 
 builder.Services.AddApplicationServices();
@@ -16,12 +17,14 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-	app.UseMigrationsEndPoint();
+    app.UseDeveloperExceptionPage();
+    app.UseMigrationsEndPoint();
 }
 else
 {
-	app.UseExceptionHandler("/Home/Error");
-	app.UseHsts();
+    app.UseExceptionHandler("/Home/Error/500");
+    app.UseStatusCodePagesWithRedirects("/Home/Error?statusCode={0}");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
