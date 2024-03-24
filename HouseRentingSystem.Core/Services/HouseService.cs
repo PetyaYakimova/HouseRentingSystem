@@ -122,6 +122,12 @@ namespace HouseRentingSystem.Core.Services
 
         }
 
+        public async Task DeleteAsync(int houseId)
+        {
+            await repository.DeleteAsync<House>(houseId);
+            await repository.SaveChangesAsync();
+        }
+
         public async Task EditAsync(int houseId, HouseFormModel model)
         {
             var house = await repository.GetByIdAsync<House>(houseId);
@@ -190,9 +196,36 @@ namespace HouseRentingSystem.Core.Services
                     Description = h.Description,
                     IsRented = h.RenterId != null,
                     PricePerMonth = h.PricePerMonth,
-                    Title = h.Title
+                    Title = h.Title,
+                    ImageUrl = h.ImageUrl
                 })
                 .FirstAsync();
+        }
+
+        public async Task<bool> IsRentedAsync(int houseId)
+        {
+            bool result = false;
+
+            var house = await repository.GetByIdAsync<House>(houseId);
+            if (house != null)
+            {
+                result = house.RenterId != null;
+            }
+
+            return result;
+        }
+
+        public async Task<bool> IsRentedByUserWithIdAsync(int houseId, string userId)
+        {
+            bool result = false;
+
+            var house = await repository.GetByIdAsync<House>(houseId);
+            if (house != null)
+            {
+                result = house.RenterId == userId;
+            }
+
+            return result;
         }
 
         public async Task<IEnumerable<HouseIndexServiceModel>> LastThreeHousesAsync()
@@ -207,6 +240,26 @@ namespace HouseRentingSystem.Core.Services
                     ImageUrl = h.ImageUrl,
                     Title = h.Title
                 }).ToListAsync();
+        }
+
+        public async Task LeaveAsync(int houseId)
+        {
+            var house = await repository.GetByIdAsync<House>(houseId);
+            if (house != null)
+            {
+                house.RenterId = null;
+                await repository.SaveChangesAsync();
+            }
+        }
+
+        public async Task RentAsync(int houseId, string userId)
+        {
+            var house = await repository.GetByIdAsync<House>(houseId);
+            if (house != null)
+            {
+                house.RenterId = userId;
+                await repository.SaveChangesAsync();
+            }
         }
     }
 }
