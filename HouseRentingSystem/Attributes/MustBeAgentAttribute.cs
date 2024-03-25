@@ -1,4 +1,4 @@
-﻿using HouseRentingSystem.Core.Contacts;
+﻿using HouseRentingSystem.Core.Contracts;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

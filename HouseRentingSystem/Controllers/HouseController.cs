@@ -1,233 +1,240 @@
 ﻿using HouseRentingSystem.Attributes;
-using HouseRentingSystem.Core.Contacts;
+using HouseRentingSystem.Core.Contracts;
+using HouseRentingSystem.Core.Extensions;
 using HouseRentingSystem.Core.Models.House;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using System.Security.Claims;
 
 namespace HouseRentingSystem.Controllers
 {
-    public class HouseController : BaseController
-    {
-        private readonly IHouseService houseService;
-        private readonly IAgentService agentService;
+	public class HouseController : BaseController
+	{
+		private readonly IHouseService houseService;
+		private readonly IAgentService agentService;
 
-        public HouseController(IHouseService houseService, IAgentService agentService)
-        {
-            this.houseService = houseService;
-            this.agentService = agentService;
-        }
+		public HouseController(IHouseService houseService, IAgentService agentService)
+		{
+			this.houseService = houseService;
+			this.agentService = agentService;
+		}
 
-        [AllowAnonymous]
-        [HttpGet]
-        public async Task<IActionResult> All([FromQuery] AllHousesQueryModel model)
-        {
-            var houses = await houseService.AllAsync(model.Category, model.SearchTerm, model.Sorting, model.CurrentPage, model.HousesPerPage);
+		[AllowAnonymous]
+		[HttpGet]
+		public async Task<IActionResult> All([FromQuery] AllHousesQueryModel model)
+		{
+			var houses = await houseService.AllAsync(model.Category, model.SearchTerm, model.Sorting, model.CurrentPage, model.HousesPerPage);
 
-            model.TotalHousesCount = houses.TotalHousesCount;
-            model.Houses = houses.Houses;
-            model.Categories = await houseService.AllCategoriesNamesAsync();
+			model.TotalHousesCount = houses.TotalHousesCount;
+			model.Houses = houses.Houses;
+			model.Categories = await houseService.AllCategoriesNamesAsync();
 
-            return View(model);
-        }
+			return View(model);
+		}
 
-        [HttpGet]
-        public async Task<IActionResult> Mine()
-        {
-            var userId = User.Id();
-            IEnumerable<HouseServiceModel> model;
+		[HttpGet]
+		public async Task<IActionResult> Mine()
+		{
+			var userId = User.Id();
+			IEnumerable<HouseServiceModel> model;
 
-            if (await agentService.ExistsByIdAsync(userId))
-            {
-                int agentId = await agentService.GetAgentByIdAsync(userId) ?? 0;
-                model = await houseService.AllHousesByAgentIdAsync(agentId);
-            }
-            else
-            {
-                model = await houseService.AllHousesByUserId(userId);
-            }
+			if (await agentService.ExistsByIdAsync(userId))
+			{
+				int agentId = await agentService.GetAgentByIdAsync(userId) ?? 0;
+				model = await houseService.AllHousesByAgentIdAsync(agentId);
+			}
+			else
+			{
+				model = await houseService.AllHousesByUserId(userId);
+			}
 
-            return View(model);
-        }
+			return View(model);
+		}
 
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-            if (await houseService.ExistsAsync(id) == false)
-            {
-                return BadRequest();
-            }
+		[HttpGet]
+		public async Task<IActionResult> Details(int id, string information)
+		{
+			if (await houseService.ExistsAsync(id) == false)
+			{
+				return BadRequest();
+			}
 
-            var model = await houseService.HouseDetailsByIdAsync(id);
+			var model = await houseService.HouseDetailsByIdAsync(id);
 
-            return View(model);
-        }
+			if (information != model.GetInformation())
+			{
+				return BadRequest();
+			}
 
-        [HttpGet]
-        [MustBeAgent]
-        public async Task<IActionResult> Add()
-        {
-            var model = new HouseFormModel()
-            {
-                Categories = await houseService.AllCategoriesAsync()
-            };
+			return View(model);
+		}
 
-            return View(model);
-        }
+		[HttpGet]
+		[MustBeAgent]
+		public async Task<IActionResult> Add()
+		{
+			var model = new HouseFormModel()
+			{
+				Categories = await houseService.AllCategoriesAsync()
+			};
 
-        [HttpPost]
-        [MustBeAgent]
-        public async Task<IActionResult> Add(HouseFormModel model)
-        {
-            if (await houseService.CategoryExistsAsync(model.CategoryId) == false)
-            {
-                ModelState.AddModelError(nameof(model.CategoryId), "Category does not exist");
-            }
+			return View(model);
+		}
 
-            if (ModelState.IsValid == false)
-            {
-                model.Categories = await houseService.AllCategoriesAsync();
-                return View(model);
-            }
+		[HttpPost]
+		[MustBeAgent]
+		public async Task<IActionResult> Add(HouseFormModel model)
+		{
+			if (await houseService.CategoryExistsAsync(model.CategoryId) == false)
+			{
+				ModelState.AddModelError(nameof(model.CategoryId), "Category does not exist");
+			}
 
-            int? agentId = await agentService.GetAgentByIdAsync(User.Id());
+			if (ModelState.IsValid == false)
+			{
+				model.Categories = await houseService.AllCategoriesAsync();
+				return View(model);
+			}
 
-            int newHouseId = await houseService.CreateAsync(model, agentId ?? 0);
+			int? agentId = await agentService.GetAgentByIdAsync(User.Id());
 
-            return RedirectToAction(nameof(Details), new { id = newHouseId });
-        }
+			int newHouseId = await houseService.CreateAsync(model, agentId ?? 0);
 
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            if (await houseService.ExistsAsync(id) == false)
-            {
-                return BadRequest();
-            }
+			return RedirectToAction(nameof(Details), new { id = newHouseId, information = model.GetInformation() });
+		}
 
-            if (await houseService.HasAgentWithIdAsync(id, User.Id()) == false)
-            {
-                return Unauthorized();
-            }
+		[HttpGet]
+		public async Task<IActionResult> Edit(int id)
+		{
+			if (await houseService.ExistsAsync(id) == false)
+			{
+				return BadRequest();
+			}
 
-            var model = await houseService.GetHouseFormModelByIdAsync(id);
+			if (await houseService.HasAgentWithIdAsync(id, User.Id()) == false)
+			{
+				return Unauthorized();
+			}
 
-            return View(model);
-        }
+			var model = await houseService.GetHouseFormModelByIdAsync(id);
 
-        [HttpPost]
-        public async Task<IActionResult> Edit(int id, HouseFormModel model)
-        {
-            if (await houseService.ExistsAsync(id) == false)
-            {
-                return BadRequest();
-            }
+			return View(model);
+		}
 
-            if (await houseService.HasAgentWithIdAsync(id, User.Id()) == false)
-            {
-                return Unauthorized();
-            }
+		[HttpPost]
+		public async Task<IActionResult> Edit(int id, HouseFormModel model)
+		{
+			if (await houseService.ExistsAsync(id) == false)
+			{
+				return BadRequest();
+			}
 
-            if (await houseService.CategoryExistsAsync(model.CategoryId) == false)
-            {
-                ModelState.AddModelError(nameof(model.CategoryId), "Category does not exist");
-            }
+			if (await houseService.HasAgentWithIdAsync(id, User.Id()) == false)
+			{
+				return Unauthorized();
+			}
 
-            if (ModelState.IsValid == false)
-            {
-                model.Categories = await houseService.AllCategoriesAsync();
+			if (await houseService.CategoryExistsAsync(model.CategoryId) == false)
+			{
+				ModelState.AddModelError(nameof(model.CategoryId), "Category does not exist");
+			}
 
-                return View(model);
-            }
+			if (ModelState.IsValid == false)
+			{
+				model.Categories = await houseService.AllCategoriesAsync();
 
-            await houseService.EditAsync(id, model);
+				return View(model);
+			}
 
-            return RedirectToAction(nameof(Details), new { id = id });
-        }
+			await houseService.EditAsync(id, model);
 
-        [HttpGet]
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (await houseService.ExistsAsync(id) == false)
-            {
-                return BadRequest();
-            }
+			return RedirectToAction(nameof(Details), new { id = id, information = model.GetInformation() });
+		}
 
-            if (await houseService.HasAgentWithIdAsync(id, User.Id()) == false)
-            {
-                return Unauthorized();
-            }
+		[HttpGet]
+		public async Task<IActionResult> Delete(int id)
+		{
+			if (await houseService.ExistsAsync(id) == false)
+			{
+				return BadRequest();
+			}
 
-            var house = await houseService.HouseDetailsByIdAsync(id);
+			if (await houseService.HasAgentWithIdAsync(id, User.Id()) == false)
+			{
+				return Unauthorized();
+			}
 
-            var model = new HouseDetailsViewModel()
-            {
-                Id = id,
-                Address = house.Address,
-                ImageUrl = house.ImageUrl,
-                Title = house.Title
-            };
+			var house = await houseService.HouseDetailsByIdAsync(id);
 
-            return View(model);
-        }
+			var model = new HouseDetailsViewModel()
+			{
+				Id = id,
+				Address = house.Address,
+				ImageUrl = house.ImageUrl,
+				Title = house.Title
+			};
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(HouseDetailsViewModel model)
-        {
-            if (await houseService.ExistsAsync(model.Id) == false)
-            {
-                return BadRequest();
-            }
+			return View(model);
+		}
 
-            if (await houseService.HasAgentWithIdAsync(model.Id, User.Id()) == false)
-            {
-                return Unauthorized();
-            }
+		[HttpPost]
+		public async Task<IActionResult> Delete(HouseDetailsViewModel model)
+		{
+			if (await houseService.ExistsAsync(model.Id) == false)
+			{
+				return BadRequest();
+			}
 
-            await houseService.DeleteAsync(model.Id);
+			if (await houseService.HasAgentWithIdAsync(model.Id, User.Id()) == false)
+			{
+				return Unauthorized();
+			}
 
-            return RedirectToAction(nameof(All));
-        }
+			await houseService.DeleteAsync(model.Id);
 
-        [HttpPost]
-        public async Task<IActionResult> Rent(int id)
-        {
-            if (await houseService.ExistsAsync(id) == false)
-            {
-                return BadRequest();
-            }
+			return RedirectToAction(nameof(All));
+		}
 
-            if (await agentService.ExistsByIdAsync(User.Id()))
-            {
-                return Unauthorized();
-            }
+		[HttpPost]
+		public async Task<IActionResult> Rent(int id)
+		{
+			if (await houseService.ExistsAsync(id) == false)
+			{
+				return BadRequest();
+			}
 
-            if (await houseService.IsRentedAsync(id))
-            {
-                return BadRequest();
-            }
+			if (await agentService.ExistsByIdAsync(User.Id()))
+			{
+				return Unauthorized();
+			}
 
-            await houseService.RentAsync(id, User.Id());
+			if (await houseService.IsRentedAsync(id))
+			{
+				return BadRequest();
+			}
 
-            return RedirectToAction(nameof(Mine));
-        }
+			await houseService.RentAsync(id, User.Id());
 
-        [HttpPost]
-        public async Task<IActionResult> Leave(int id)
-        {
-            if (await houseService.ExistsAsync(id) == false)
-            {
-                return BadRequest();
-            }
+			return RedirectToAction(nameof(Mine));
+		}
 
-            if (await houseService.IsRentedByUserWithIdAsync(id, User.Id()) == false)
-            {
-                return Unauthorized();
-            }
+		[HttpPost]
+		public async Task<IActionResult> Leave(int id)
+		{
+			if (await houseService.ExistsAsync(id) == false)
+			{
+				return BadRequest();
+			}
 
-            await houseService.LeaveAsync(id);
+			if (await houseService.IsRentedByUserWithIdAsync(id, User.Id()) == false)
+			{
+				return Unauthorized();
+			}
 
-            return RedirectToAction(nameof(Mine));
-        }
-    }
+			await houseService.LeaveAsync(id);
+
+			return RedirectToAction(nameof(Mine));
+		}
+	}
 }

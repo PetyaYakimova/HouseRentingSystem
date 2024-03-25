@@ -1,4 +1,4 @@
-﻿using HouseRentingSystem.Core.Contacts;
+﻿using HouseRentingSystem.Core.Contracts;
 using HouseRentingSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

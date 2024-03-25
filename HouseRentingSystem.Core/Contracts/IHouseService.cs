@@ -2,7 +2,7 @@
 using HouseRentingSystem.Core.Models.Home;
 using HouseRentingSystem.Core.Models.House;
 
-namespace HouseRentingSystem.Core.Contacts
+namespace HouseRentingSystem.Core.Contracts
 {
     public interface IHouseService
     {

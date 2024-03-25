@@ -1,4 +1,4 @@
-﻿using HouseRentingSystem.Core.Contacts;
+﻿using HouseRentingSystem.Core.Contracts;
 using HouseRentingSystem.Infrastructure.Data.Common;
 using HouseRentingSystem.Infrastructure.Data.Models;
 using Microsoft.EntityFrameworkCore;

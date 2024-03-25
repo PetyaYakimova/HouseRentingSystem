@@ -1,4 +1,4 @@
-﻿using HouseRentingSystem.Core.Contacts;
+﻿using HouseRentingSystem.Core.Contracts;
 using HouseRentingSystem.Core.Enumerations;
 using HouseRentingSystem.Core.Models.Agent;
 using HouseRentingSystem.Core.Models.Home;
@@ -237,6 +237,7 @@ namespace HouseRentingSystem.Core.Services
                 .Select(h => new HouseIndexServiceModel()
                 {
                     Id = h.Id,
+                    Address = h.Address,
                     ImageUrl = h.ImageUrl,
                     Title = h.Title
                 }).ToListAsync();

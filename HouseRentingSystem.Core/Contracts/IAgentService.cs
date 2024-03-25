@@ -1,4 +1,4 @@
-﻿namespace HouseRentingSystem.Core.Contacts
+﻿namespace HouseRentingSystem.Core.Contracts
 {
     public interface IAgentService
     {
