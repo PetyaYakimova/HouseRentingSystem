@@ -9,7 +9,11 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 
 		public ApplicationUser GuestUser { get; set; }
 
+		public ApplicationUser AdminUser { get; set; }
+
 		public Agent Agent { get; set; }
+
+		public Agent AdminAgent { get; set; }
 
 		public Category CottageCategory { get; set; }
 
@@ -41,7 +45,9 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 				UserName = "agent@mail.com",
 				NormalizedUserName = "agent@mail.com",
 				Email = "agent@mail.com",
-				NormalizedEmail = "agent@mail.com"
+				NormalizedEmail = "agent@mail.com",
+				FirstName = "Agent",
+				Lastname="007"
 			};
 
 			AgentUser.PasswordHash =
@@ -53,11 +59,27 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 				UserName = "guest@mail.com",
 				NormalizedUserName = "guest@mail.com",
 				Email = "guest@mail.com",
-				NormalizedEmail = "guest@mail.com"
+				NormalizedEmail = "guest@mail.com",
+				FirstName = "Guest",
+				Lastname = "Guestov"
 			};
 
 			GuestUser.PasswordHash =
 			hasher.HashPassword(AgentUser, "guest123");
+
+			AdminUser = new ApplicationUser()
+			{
+				Id = "1e0da5de-b66c-4663-995d-39670d00d6e6",
+				UserName = "admin@mail.com",
+				NormalizedUserName = "ADMIN@MAIL.COM",
+				Email = "admin@mail.com",
+				NormalizedEmail = "ADMIN@MAIL.COM",
+				FirstName = "Great",
+				Lastname = "Admin"
+			};
+
+			GuestUser.PasswordHash =
+			hasher.HashPassword(AdminUser, "admin123");
 		}
 
 		private void SeedAgent()
@@ -67,6 +89,13 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 				Id = 1,
 				PhoneNumber = "+359888888888",
 				UserId = AgentUser.Id
+			};
+
+			AdminAgent = new Agent()
+			{
+				Id = 3,
+				PhoneNumber = "+359777777777",
+				UserId = AdminUser.Id
 			};
 		}
 

@@ -8,8 +8,7 @@
 	string userName = string.Empty;
 	if (SignInManager.IsSignedIn(User))
 	{
-		var user = await UserManager.FindByIdAsync(User.Id());
-		userName = $"{user.FirstName} {user.Lastname}";
+		userName = User.FindFirstValue(HouseRentingSystem.Core.Constants.CustomClaims.UserFullNameClaim) ?? string.Empty;
 	}
 }
 
