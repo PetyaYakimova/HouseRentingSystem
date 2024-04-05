@@ -5,30 +5,47 @@ using System.Security.Claims;
 
 namespace HouseRentingSystem.Areas.Admin.Controllers
 {
-    public class HouseController : AdminBaseController
-    {
-        private readonly IHouseService houseService;
-        private readonly IAgentService agentService;
+	public class HouseController : AdminBaseController
+	{
+		private readonly IHouseService houseService;
+		private readonly IAgentService agentService;
 
-        public HouseController(
-            IHouseService _houseService,
-            IAgentService _agentService)
-        {
-            houseService = _houseService;
-            agentService = _agentService;
-        }
+		public HouseController(
+			IHouseService _houseService,
+			IAgentService _agentService)
+		{
+			houseService = _houseService;
+			agentService = _agentService;
+		}
 
-        public async Task<IActionResult> Mine()
-        {
-            string userId = User.Id();
-            int agentId = await agentService.GetAgentIdAsync(userId) ?? 0;
+		[HttpGet]
+		public async Task<IActionResult> Mine()
+		{
+			string userId = User.Id();
+			int agentId = await agentService.GetAgentIdAsync(userId) ?? 0;
 
-            var myHouses = new MyHousesViewModel()
-            {
-                AddedHouses = await houseService.AllHousesByAgentIdAsync(agentId),
-                RentedHouses = await houseService.AllHousesByUserId(userId)
-            };
-            return View(myHouses);
-        }
-    }
+			var myHouses = new MyHousesViewModel()
+			{
+				AddedHouses = await houseService.AllHousesByAgentIdAsync(agentId),
+				RentedHouses = await houseService.AllHousesByUserId(userId)
+			};
+			return View(myHouses);
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> Approve()
+		{
+			var model = await houseService.GetUnapprovedHousesAsync();
+
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Approve(int houseId)
+		{
+			await houseService.ApproveHouseAsync(houseId);
+
+			return RedirectToAction(nameof(Approve));
+		}
+	}
 }

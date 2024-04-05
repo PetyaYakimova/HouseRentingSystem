@@ -100,6 +100,18 @@ namespace HouseRentingSystem.Core.Services
 				 .ToListAsync();
 		}
 
+		public async Task ApproveHouseAsync(int houseId)
+		{
+			var house = await repository.GetByIdAsync<House>(houseId);
+
+			if (house != null && house.IsApproved == false)
+			{
+				house.IsApproved = true;
+
+				await repository.SaveChangesAsync();
+			}
+		}
+
 		public async Task<bool> CategoryExistsAsync(int categoryId)
 		{
 			return await repository.AllReadOnly<Category>()
@@ -178,6 +190,22 @@ namespace HouseRentingSystem.Core.Services
 			return house;
 		}
 
+		public async Task<IEnumerable<HouseServiceModel>> GetUnapprovedHousesAsync()
+		{
+			return await repository.AllReadOnly<House>()
+				.Where(h=>h.IsApproved==false)
+				.Select(h=>new HouseServiceModel()
+				{
+					Id = h.Id,
+					Address = h.Address,
+					Title = h.Title,
+					ImageUrl = h.ImageUrl,
+					IsRented = h.RenterId!=null,
+					PricePerMonth = h.PricePerMonth
+				})
+				.ToListAsync();
+		}
+
 		public async Task<bool> HasAgentWithIdAsync(int houseId, string userId)
 		{
 			return await repository.AllReadOnly<House>()
@@ -195,7 +223,7 @@ namespace HouseRentingSystem.Core.Services
 					Address = h.Address,
 					Agent = new AgentServiceModel()
 					{
-						FullName = $"{h.Agent.User.FirstName} {h.Agent.User.Lastname}",
+						FullName = $"{h.Agent.User.FirstName} {h.Agent.User.LastName}",
 						Email = h.Agent.User.Email,
 						PhoneNumber = h.Agent.PhoneNumber
 					},

@@ -54,7 +54,7 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 				Email = "agent@mail.com",
 				NormalizedEmail = "agent@mail.com",
 				FirstName = "Agent",
-				Lastname="007"
+				LastName="007"
 			};
 
 			AgentUser.PasswordHash =
@@ -76,7 +76,7 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 				Email = "guest@mail.com",
 				NormalizedEmail = "guest@mail.com",
 				FirstName = "Guest",
-				Lastname = "Guestov"
+				LastName = "Guestov"
 			};
 
 			GuestUser.PasswordHash =
@@ -98,7 +98,7 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 				Email = "admin@mail.com",
 				NormalizedEmail = "ADMIN@MAIL.COM",
 				FirstName = "Great",
-				Lastname = "Admin"
+				LastName = "Admin"
 			};
 
 			AdminUser.PasswordHash =

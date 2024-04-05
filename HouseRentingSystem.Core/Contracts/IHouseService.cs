@@ -46,5 +46,9 @@ namespace HouseRentingSystem.Core.Contracts
         Task RentAsync(int houseId, string userId);
 
         Task LeaveAsync(int houseId);
+
+        Task<IEnumerable<HouseServiceModel>> GetUnapprovedHousesAsync();
+
+        Task ApproveHouseAsync(int houseId);
     }
 }

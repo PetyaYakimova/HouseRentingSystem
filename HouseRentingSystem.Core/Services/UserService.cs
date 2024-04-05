@@ -22,7 +22,7 @@ namespace HouseRentingSystem.Core.Services
 				.Select(u => new UserServiceModel()
 				{
 					Email = u.Email,
-					FullName = $"{u.FirstName} {u.Lastname}",
+					FullName = $"{u.FirstName} {u.LastName}",
 					IsAgent = u.Agent != null,
 					PhoneNumber = u.Agent != null ? u.Agent.PhoneNumber : null
 				})
@@ -36,7 +36,7 @@ namespace HouseRentingSystem.Core.Services
 
 			if (user != null)
 			{
-				result = $"{user.FirstName} {user.Lastname}";
+				result = $"{user.FirstName} {user.LastName}";
 			}
 
 			return result;
