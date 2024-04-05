@@ -10,6 +10,6 @@
 
         Task CreateAsync(string userId, string phoneNumber);
 
-        Task<int?> GetAgentByIdAsync(string userId);
+        Task<int?> GetAgentIdAsync(string userId);
     }
 }

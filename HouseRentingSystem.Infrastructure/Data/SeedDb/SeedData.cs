@@ -1,5 +1,6 @@
 ﻿using HouseRentingSystem.Infrastructure.Data.Models;
 using Microsoft.AspNetCore.Identity;
+using static HouseRentingSystem.Infrastructure.Constants.CustomClaims;
 
 namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 {
@@ -7,9 +8,15 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 	{
 		public ApplicationUser AgentUser { get; set; }
 
+		public IdentityUserClaim<string> AgentUserClaim { get; set; }
+
 		public ApplicationUser GuestUser { get; set; }
 
+		public IdentityUserClaim<string> GuestUserClaim { get; set; }
+
 		public ApplicationUser AdminUser { get; set; }
+
+		public IdentityUserClaim<string> AdminUserClaim { get; set; }
 
 		public Agent Agent { get; set; }
 
@@ -53,6 +60,14 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 			AgentUser.PasswordHash =
 				 hasher.HashPassword(AgentUser, "agent123");
 
+			AgentUserClaim = new IdentityUserClaim<string>()
+			{
+				Id = 1,
+				ClaimType = UserFullNameClaim,
+				ClaimValue = "Agent Agentov",
+				UserId = AgentUser.Id
+			};
+
 			GuestUser = new ApplicationUser()
 			{
 				Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
@@ -67,6 +82,14 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 			GuestUser.PasswordHash =
 			hasher.HashPassword(AgentUser, "guest123");
 
+			GuestUserClaim = new IdentityUserClaim<string>()
+			{
+				Id = 2,
+				ClaimType = UserFullNameClaim,
+				ClaimValue = "Guest Guestov",
+				UserId = GuestUser.Id
+			};
+
 			AdminUser = new ApplicationUser()
 			{
 				Id = "1e0da5de-b66c-4663-995d-39670d00d6e6",
@@ -80,6 +103,14 @@ namespace HouseRentingSystem.Infrastructure.Data.SeedDb
 
 			AdminUser.PasswordHash =
 			hasher.HashPassword(AdminUser, "admin123");
+
+			AdminUserClaim = new IdentityUserClaim<string>()
+			{
+				Id = 3,
+				ClaimType = UserFullNameClaim,
+				ClaimValue = "Great Admin",
+				UserId = AdminUser.Id
+			};
 		}
 
 		private void SeedAgent()

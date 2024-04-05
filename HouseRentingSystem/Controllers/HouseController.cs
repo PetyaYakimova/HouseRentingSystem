@@ -39,9 +39,14 @@ namespace HouseRentingSystem.Controllers
 			var userId = User.Id();
 			IEnumerable<HouseServiceModel> model;
 
+			if (User.IsAdmin())
+			{
+				return RedirectToAction("Mine", "House", new { area = "Admin" });
+			}
+
 			if (await agentService.ExistsByIdAsync(userId))
 			{
-				int agentId = await agentService.GetAgentByIdAsync(userId) ?? 0;
+				int agentId = await agentService.GetAgentIdAsync(userId) ?? 0;
 				model = await houseService.AllHousesByAgentIdAsync(agentId);
 			}
 			else
@@ -97,7 +102,7 @@ namespace HouseRentingSystem.Controllers
 				return View(model);
 			}
 
-			int? agentId = await agentService.GetAgentByIdAsync(User.Id());
+			int? agentId = await agentService.GetAgentIdAsync(User.Id());
 
 			int newHouseId = await houseService.CreateAsync(model, agentId ?? 0);
 
