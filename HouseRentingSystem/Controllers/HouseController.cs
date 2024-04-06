@@ -4,8 +4,8 @@ using HouseRentingSystem.Core.Extensions;
 using HouseRentingSystem.Core.Models.House;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 using System.Security.Claims;
+using static HouseRentingSystem.Core.Constants.MessageConstants;
 
 namespace HouseRentingSystem.Controllers
 {
@@ -226,6 +226,7 @@ namespace HouseRentingSystem.Controllers
 
 			await houseService.RentAsync(id, User.Id());
 
+			TempData[UserMessageSucceess] = "You have rented the house!";
 			return RedirectToAction(nameof(Mine));
 		}
 
@@ -243,6 +244,8 @@ namespace HouseRentingSystem.Controllers
 			}
 
 			await houseService.LeaveAsync(id);
+
+			TempData[UserMessageSucceess] = "You have left the house!";
 
 			return RedirectToAction(nameof(Mine));
 		}

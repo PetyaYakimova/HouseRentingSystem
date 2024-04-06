@@ -11,5 +11,9 @@
         public const string HasRentsErrorMessage = "You should have no rents to become an agent.";
 
         public const string PriceErrorMessage = "Price per month must be a positive nnumber and less than {2} leva.";
-    }
+
+        public const string UserMessageSucceess = "UserMessageSucceess";
+
+		public const string UserMessageError = "UserMessageError";
+	}
 }
